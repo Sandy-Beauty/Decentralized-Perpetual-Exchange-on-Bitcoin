@@ -259,3 +259,74 @@
     tier: uint
   }
 )
+
+(define-map reward-pools
+  { market-id: uint }
+  {
+    total-staked: uint,
+    reward-per-block: uint,
+    accumulated-reward-per-share: uint,
+    last-reward-block: uint,
+    total-rewards-distributed: uint
+  }
+)
+
+;; INSURANCE FUND SYSTEM
+(define-map insurance-fund
+  { market-id: uint }
+  {
+    balance: uint,
+    contribution-rate: uint, ;; Percentage of trading fees that go to insurance
+    deficit-coverage: uint,
+    last-updated: uint
+  }
+)
+
+(define-map insurance-claims
+  { claim-id: uint }
+  {
+    market-id: uint,
+    trader: principal,
+    amount: uint,
+    reason: (string-ascii 50),
+    status: uint, ;; 0: pending, 1: approved, 2: rejected
+    timestamp: uint
+  }
+)
+
+;; REFERRAL SYSTEM
+(define-map referral-codes
+  { code: (string-ascii 20) }
+  {
+    referrer: principal,
+    total-referrals: uint,
+    total-volume: uint,
+    commission-earned: uint,
+    is-active: bool
+  }
+)
+
+(define-map user-referrals
+  { user: principal }
+  {
+    referrer: (optional principal),
+    referred-users: uint,
+    referral-rewards: uint,
+    discount-tier: uint
+  }
+)
+
+;; ADVANCED ORDER TYPES & STRATEGIES
+(define-map advanced-orders
+  { order-id: (buff 32) }
+  {
+    trader: principal,
+    market-id: uint,
+    order-type: uint, ;; 5: OCO, 6: Trailing Stop, 7: TWAP, 8: Iceberg
+    primary-price: uint,
+    secondary-price: (optional uint),
+    trail-amount: (optional uint),
+    time-in-force: uint,
+    execution-params: (optional (buff 100))
+  }
+)
