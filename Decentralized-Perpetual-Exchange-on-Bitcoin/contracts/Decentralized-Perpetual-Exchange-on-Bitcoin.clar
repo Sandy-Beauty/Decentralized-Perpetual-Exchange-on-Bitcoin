@@ -54,3 +54,82 @@
     max-open-interest: uint    ;; Maximum open interest per side
   }
 )
+
+;; User positions
+(define-map positions
+  { market-id: uint, trader: principal }
+  {
+    size: int,              ;; Position size (positive for long, negative for short)
+    collateral: uint,       ;; Collateral amount in STX
+    entry-price: uint,      ;; Average entry price
+    last-cumulative-funding: int, ;; Last funding snapshot
+    liquidation-price: uint, ;; Price at which position gets liquidated
+    last-updated-block: uint, ;; Last block when position was updated
+    realized-pnl: int,      ;; Realized profit and loss
+    leverage: uint,         ;; Current leverage used
+    margin-ratio: uint      ;; Current margin ratio
+  }
+)
+
+;; Order book
+(define-map orders
+  { order-id: (buff 32) }
+  {
+    market-id: uint,
+    trader: principal,
+    side: uint,             ;; SIDE_LONG or SIDE_SHORT
+    size: uint,             ;; Order size
+    price: uint,            ;; Limit price, or trigger price for stop orders
+    limit-price: (optional uint), ;; For stop-limit orders
+    collateral: uint,       ;; Amount of collateral to use
+    leverage: uint,         ;; Requested leverage
+    order-type: uint,       ;; ORDER_MARKET, ORDER_LIMIT, etc.
+    created-at: uint,       ;; Block height when order was created
+    status: uint,           ;; 0: open, 1: filled, 2: cancelled, 3: expired
+    filled-size: uint,      ;; Amount filled so far
+    average-fill-price: uint ;; Average fill price
+  }
+)
+
+;; Oracle price feeds
+(define-map oracle-price-feeds
+  { oracle-id: (buff 32) }
+  {
+    price: uint,
+    timestamp: uint,
+    source: (string-ascii 32),
+    heartbeat: uint, ;; Maximum time between updates before price is considered stale
+    providers: (list 10 principal) ;; List of authorized price providers
+  }
+)
+
+;; User account information
+(define-map user-accounts
+  { user: principal }
+  {
+    total-collateral: uint,
+    unrealized-pnl: int,
+    realized-pnl: int,
+    margin-ratio: uint,
+    total-fees-paid: uint,
+    total-funding-paid: int
+  }
+)
+
+;; Trading volume tracking
+(define-map trading-volumes
+  { market-id: uint, trader: principal, period: uint } ;; period: 0 = daily, 1 = weekly, 2 = monthly
+  {
+    volume: uint,
+    timestamp: uint
+  }
+)
+
+;; Funding rate history
+(define-map funding-history
+  { market-id: uint, timestamp: uint }
+  {
+    funding-rate: int,
+    premium-index: int
+  }
+)
