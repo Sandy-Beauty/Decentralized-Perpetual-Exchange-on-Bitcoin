@@ -195,3 +195,67 @@
     current-funding-rate ;; Simplified - should accumulate historical rates
   )
 )
+
+;; Create a new position
+(define-private (create-new-position
+                (market-id uint)
+                (trader principal)
+                (size int)
+                (collateral uint)
+                (entry-price uint)
+                (liquidation-price uint)
+                (leverage uint)
+                (margin-ratio uint))
+  (begin
+    (map-set positions
+      { market-id: market-id, trader: trader }
+      {
+        size: size,
+        collateral: collateral,
+        entry-price: entry-price,
+        last-cumulative-funding: (get-cumulative-funding market-id),
+        liquidation-price: liquidation-price,
+        last-updated-block: stacks-block-height,
+        realized-pnl: 0,
+        leverage: leverage,
+        margin-ratio: margin-ratio
+      }
+    )
+    (ok true)
+  )
+)
+
+;; Additional constants for new features
+(define-constant ERR_REWARD_POOL_EMPTY (err u119))
+(define-constant ERR_INSURANCE_FUND_INSUFFICIENT (err u120))
+(define-constant ERR_REFERRAL_NOT_FOUND (err u121))
+(define-constant ERR_VAULT_NOT_FOUND (err u122))
+(define-constant ERR_STRATEGY_NOT_APPROVED (err u123))
+(define-constant ERR_GOVERNANCE_PROPOSAL_NOT_FOUND (err u124))
+(define-constant ERR_STAKING_PERIOD_NOT_EXPIRED (err u125))
+(define-constant ERR_CROSS_MARGIN_INSUFFICIENT (err u126))
+
+;; Staking reward tiers
+(define-constant TIER_BRONZE u1)
+(define-constant TIER_SILVER u2)
+(define-constant TIER_GOLD u3)
+(define-constant TIER_PLATINUM u4)
+
+;; Governance proposal types
+(define-constant PROPOSAL_PARAMETER_CHANGE u1)
+(define-constant PROPOSAL_MARKET_ADDITION u2)
+(define-constant PROPOSAL_FEE_STRUCTURE u3)
+(define-constant PROPOSAL_EMERGENCY_PAUSE u4)
+
+;; LIQUIDITY MINING & REWARDS SYSTEM
+(define-map liquidity-providers
+  { provider: principal, market-id: uint }
+  {
+    staked-amount: uint,
+    reward-debt: uint,
+    accumulated-rewards: uint,
+    staking-timestamp: uint,
+    lock-period: uint,
+    tier: uint
+  }
+)
